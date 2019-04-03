@@ -15,8 +15,8 @@ public class Devolucion {
 		ArrayList<Integer> a = new ArrayList<Integer>();
 		a.add(0);
 		a.add(0);
-		Estado inicial = new Estado(0, a);
-		backward(inicial, 3);
+		Estado inicial = new Estado(3, a);
+		backward(inicial);
 		System.out.println(sol);
 	}
 	
