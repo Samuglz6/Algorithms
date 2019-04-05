@@ -1,5 +1,7 @@
 package Combinatorio;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Scanner;
 import java.util.Stack;
 import java.util.concurrent.TimeUnit;
@@ -21,15 +23,23 @@ public class Combinatorio {
 	   imprimir(recursivo(valores[0], valores[1]),"Recursivo");
 	   imprimir(recursivoDosPilas(valores[0], valores[1]), "Recursivo (2 pilas)");
 	   imprimir(recursivoTresPilas(valores[0], valores[1]), "Recursivo (3 pilas)");
-	  // imprimir(recursivoConPilaLlamada(valores[0], valores[1]), "Recursivo (4 pilas)");
+	   imprimir(recursivoCuatroPilas(valores[0], valores[1]), "Recursivo (4 pilas)");
 	}
 	
 	private void imprimir(int x, String s)
 	{
-		float t1, t2;
-		t1 = System.currentTimeMillis();
-		System.out.printf("\nAlgoritmo %s :\nResultado: %d\n", s, x);
-		System.out.printf("Tiempo: %f ms\n", (System.currentTimeMillis()-t1));
+		Instant start = Instant.now();
+		System.out.printf("\nAlgoritmo %s:\nResultado: %d\n", s, x);
+		long time = Duration.between(start, Instant.now()).toMillis();
+		System.out.println("Time: "+time+" ms");
+	}
+	
+	private void imprimir(double x, String s)
+	{
+		Instant start = Instant.now();
+		System.out.printf("\nAlgoritmo %s:\nResultado: %.0f\n", s, x);
+		long time = Duration.between(start, Instant.now()).toMillis();
+		System.out.println("Time: "+time+" ms");
 	}
 	
 	private int[] pedirValores() throws InterruptedException
@@ -45,19 +55,20 @@ public class Combinatorio {
 		return valores;
 	}
 	
-	private int iterativo(int n, int k)
+	private double iterativo(int n, int k)
 	{
-		return factorial(n)/(factorial(k)*factorial(n - k));	
+		return factorial(n)/(factorial(k) * factorial(n-k));
 	}
 	
-	private int factorial(int n)
+	private double factorial(int n)
 	{
-		int aux = 1;
-		while(n != 0){
-			aux = aux * n;
+		double valor = 1;
+		while(n > 0)
+		{
+			valor *= n;
 			n--;
 		}
-		return aux;
+		return valor;
 	}
 	
 	private int recursivo(int n, int k)
@@ -163,15 +174,8 @@ public class Combinatorio {
 		pilaResult.push(0);
 		
 		while(!pilaN.empty())
-		{				
-			if(pilaN.peek() == pilaK.peek() || pilaK.peek() == 0)
-			{
-				pilaLlamada.pop();
-				pilaN.pop();
-				pilaK.pop();
-				pilaResult.push(1);
-			}
-			else
+		{		
+			while((pilaK.peek() != 0 && pilaK.peek() != pilaN.peek()) && pilaLlamada.peek() <= 2)
 			{
 				switch(pilaLlamada.peek())
 				{
@@ -183,9 +187,23 @@ public class Combinatorio {
 						pilaN.push(pilaN.peek()-1);
 						pilaK.push(pilaK.peek());
 					break;
-				}
-				
+				}		
+				pilaLlamada.push(1);	
+				if(pilaN.peek() == pilaK.peek() || pilaK.peek() == 0) {
+					pilaResult.push(1);
+				}else
+					pilaResult.push(0);	
 			}
+			pilaN.pop(); pilaK.pop();
+			pilaLlamada.pop();
+			sol = pilaResult.pop();
+			
+			if(!pilaN.empty())
+			{
+				pilaLlamada.push(pilaLlamada.pop()+1);
+				pilaResult.push(pilaResult.pop()+sol);
+			}
+		
 		}
 		return sol;
 	}
