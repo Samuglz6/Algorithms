@@ -48,7 +48,7 @@ public class Devolucion {
 		int i;
 		boolean posible = false;
 		for(i = 0; i < monedas.size(); i++)
-			if(x-monedas.get(i) >= 0)
+			if(x-monedas.get(i) < dinero)
 			{
 				posible = true;
 				break;
@@ -62,10 +62,10 @@ public class Devolucion {
 		int contadorO, contadorD;
 		contadorO = contadorD = 0;
 		
-		for(i = 0; i < origen.getUsadas().size()-1; i++)
+		for(i = 0; i < origen.getMonedas().size()-1; i++)
 		{
-			contadorO += origen.getUsadas().get(i);
-			contadorD += destino.getUsadas().get(i);
+			contadorO += origen.getMonedas().get(i);
+			contadorD += destino.getMonedas().get(i);
 		}
 		
 		return contadorD < contadorO;
@@ -82,19 +82,28 @@ public class Devolucion {
 		return minkey;
 	}
 	
+	private int calcularUsadas(ArrayList<Integer> list)
+	{
+		int i;
+		int contador = 0;
+		for(i = 0; i < list.size(); i++)
+			contador += list.get(i);
+		return contador;
+	}
+	
 	private void imprimirSolucion(Estado e)
 	{
 		System.out.printf("Para la cantidad de %d € se han empleado:\n" , dinero);
-		for(int i= 0; i < e.getUsadas().size(); i++)
+		for(int i= 0; i < e.getMonedas().size(); i++)
 		{
-			if(e.getUsadas().get(i) > 1)
-				System.out.printf("%d monedas de %d €\n", e.getUsadas().get(i), monedas.get(i));
+			if(e.getMonedas().get(i) > 1)
+				System.out.printf("%d monedas de %d €\n", e.getMonedas().get(i), monedas.get(i));
 			else
-				System.out.printf("%d moneda de %d €\n", e.getUsadas().get(i), monedas.get(i));
+				System.out.printf("%d moneda de %d €\n", e.getMonedas().get(i), monedas.get(i));
 		}
 		if(e.getRestante() > 1)
 			System.out.printf("Y faltarían %d €\n", e.getRestante());
-		else
+		else if (e.getRestante() == 1)
 			System.out.printf("Y faltaría %d € \n", e.getRestante());
 	}
 	
@@ -120,42 +129,45 @@ public class Devolucion {
         return n;
     }
 	
-	private void forward(Estado e)
-	{
-		int i,j,k;
-	}
-	
-	
-	private void backward(Estado e)
+	private void backward(Estado actual)
 	{ 
 		int i;
-		if(e.getRestante() == 0 || !esPosible(e.getRestante()))
+		if(actual.getRestante() == 0 || !esPosible(actual.getRestante()))
 		{
-			sol.put(e.getRestante(), e);
+			sol.put(actual.getRestante(), actual);
 		}
 		else
 		{
-			for(i = monedas.size()-1; i >= 0 ; i--)
+			for(i = 0 ; i <= monedas.size()-1; i++)
 			{
-				if(e.getRestante()-monedas.get(i) >= 0)
+				if(actual.getRestante()-monedas.get(i) >= 0)
 				{
-					ArrayList<Integer> m = new ArrayList<Integer>(e.getUsadas());
-					m.set(i, e.getUsadas().get(i)+1);
-					Estado nuevo = new Estado(e.getRestante()-monedas.get(i), m);
+					ArrayList<Integer> m = new ArrayList<Integer>(actual.getMonedas());
+					m.set(i, actual.getMonedas().get(i)+1);
+					Estado nuevo = new Estado(actual.getRestante()-monedas.get(i), m);
+					nuevo.setUsadas(calcularUsadas(m));
 					
-					if(sol.containsKey(nuevo.getRestante()))
+					if(sol.containsKey(actual.getRestante()-monedas.get(i)))
 					{
-						if(esMejor(sol.get(nuevo.getRestante()) , nuevo))
+						if(sol.get(nuevo.getRestante()).getUsadas() > nuevo.getUsadas())
+						{
 							sol.put(nuevo.getRestante(), nuevo);
+							backward(sol.get(nuevo.getRestante()));
+						}
 					}
 					else
 					{
 						sol.put(nuevo.getRestante(), nuevo);
+						backward(sol.get(nuevo.getRestante()));
 					}
-					backward(sol.get(nuevo.getRestante()));
 				}
 			}
 		}
+	}
+
+	private void forward()
+	{
+		
 	}
 }
 
