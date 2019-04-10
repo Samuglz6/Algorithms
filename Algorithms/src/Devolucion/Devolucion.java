@@ -2,6 +2,7 @@ package Devolucion;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
@@ -13,24 +14,30 @@ public class Devolucion {
 	
 	public Devolucion() throws InterruptedException
 	{
-		backward(inicio());
-		imprimirSolucion(sol.get(obtenerMenor()));
+		back(inicio());
+		System.out.println(sol);
+		imprimirSolucion(sol.get(obtenerMayor()));
 	}
 
 	private Estado inicio() throws InterruptedException
 	{
 		lectura();
+		inicializarMonedas();
 		Estado inicial = new Estado(dinero, setMonedas());
 		return inicial;
+	}
+	private void inicializarMonedas()
+	{
+		//Aqui ponemos las monedas que se van a poder utilizar para dar el cambio
+		monedas.add(1);
+		monedas.add(2);
+		//monedas.add(5);
+		//monedas.add(10);
 	}
 	
 	private ArrayList<Integer> setMonedas()
 	{
 		int i;
-		
-		//Aqui ponemos las monedas que se van a poder utilizar para dar el cambio
-		monedas.add(1);
-		monedas.add(2);
 
 		ArrayList<Integer> list = new ArrayList<Integer>();
 		
@@ -71,13 +78,13 @@ public class Devolucion {
 		return contadorD < contadorO;
 	}
 	
-	private int obtenerMenor()
+	private int obtenerMayor()
 	{
 		int minkey;
-		minkey = 99999;
+		minkey = 0;
 		java.util.Set<Integer> set = sol.keySet();
 		for(int key : set)
-			if(key < minkey)
+			if(key > minkey)
 				minkey = key;
 		return minkey;
 	}
@@ -102,9 +109,20 @@ public class Devolucion {
 				System.out.printf("%d moneda de %d €\n", e.getMonedas().get(i), monedas.get(i));
 		}
 		if(e.getRestante() > 1)
-			System.out.printf("Y faltarían %d €\n", e.getRestante());
+			System.out.printf("Y faltarían %d €\n", resto(e));
 		else if (e.getRestante() == 1)
-			System.out.printf("Y faltaría %d € \n", e.getRestante());
+			System.out.printf("Y faltaría %d € \n", resto(e));
+	}
+	
+	private int resto(Estado e)
+	{
+		int i;
+		int contador = 0;
+		for(i = 0; i < monedas.size(); i++)
+		{
+			contador += monedas.get(i)*e.getMonedas().get(i);
+		}
+		return e.getRestante()-contador;
 	}
 	
 	private void lectura() throws InterruptedException
@@ -152,22 +170,72 @@ public class Devolucion {
 						if(sol.get(nuevo.getRestante()).getUsadas() > nuevo.getUsadas())
 						{
 							sol.put(nuevo.getRestante(), nuevo);
+							System.out.println(sol);
 							backward(sol.get(nuevo.getRestante()));
 						}
 					}
 					else
 					{
 						sol.put(nuevo.getRestante(), nuevo);
+						System.out.println(sol);
 						backward(sol.get(nuevo.getRestante()));
 					}
 				}
 			}
 		}
+		
+		
 	}
 
-	private void forward()
+	private ArrayList<Integer> ceroMonedas()
 	{
-		
+		int i;
+		ArrayList<Integer> list = new ArrayList<>();
+		for(i = 0; i < monedas.size(); i++)
+			list.add(0);
+		return list;
+	}
+	
+	private void back(Estado actual)
+	{
+		int i;
+		if(actual.getRestante() == 0 || !esPosible(actual.getRestante()))
+		{
+			actual.setMonedas(ceroMonedas());
+			actual.setUsadas(calcularUsadas(actual.getMonedas()));
+			sol.put(actual.getRestante(), actual);
+		}
+		else
+		{
+			for(i = 0; i < monedas.size(); i++)
+			{
+				if(actual.getRestante()-monedas.get(i) >= 0)
+				{
+					Estado nuevo = new Estado(actual.getRestante()-monedas.get(i), null);
+					System.out.println(nuevo);
+					back(nuevo);
+					if(!sol.containsKey(actual.getRestante()))
+					{
+						ArrayList<Integer> list = new ArrayList<Integer>(nuevo.getMonedas());
+						list.set(i, list.get(i)+1);
+						actual.setMonedas(list);
+						actual.setUsadas(calcularUsadas(actual.getMonedas()));
+						sol.put(actual.getRestante(), actual);
+					}
+					else
+					{
+						if(nuevo.getUsadas() < actual.getUsadas() || nuevo.getRestante() == 0)
+						{
+							ArrayList<Integer> list = new ArrayList<Integer>(sol.get(nuevo.getRestante()).getMonedas());
+							list.set(i, list.get(i)+1);
+							actual.setMonedas(list);
+							actual.setUsadas(calcularUsadas(actual.getMonedas()));
+							sol.put(actual.getRestante(), actual);
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
