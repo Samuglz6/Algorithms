@@ -26,8 +26,8 @@ public class Cono extends Funciones{
 		
 		for(int i = 0; i < k; i++) {
 			
-			x = 0;
-			y = 0;
+			x = random((-1)*r, r);
+			y = random((-1)*h, h);
 			z = 0;
 			
 			if(z <= f(x, y)) {
@@ -49,7 +49,9 @@ public class Cono extends Funciones{
 		
 	}
 
-	
-	
+	public double random(double min, double max){
+		return (Math.random() * (max - min)) + min;
+	}
 	
 }
+	
