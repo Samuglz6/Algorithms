@@ -77,7 +77,7 @@ public class Devolucion {
 		
 		return contadorD < contadorO;
 	}
-	
+
 	private int obtenerMayor()
 	{
 		int minkey;
@@ -237,5 +237,16 @@ public class Devolucion {
 			}
 		}
 	}
+	
+	/*public void forward()
+	{
+		int i, j, k;
+		ArrayList<Integer> list = new ArrayList<Integer>();
+		for(i = 0; i < monedas.size(); i++)
+			for(j = 0; j < )
+				for(k = 0; k < )
+					list();
+					
+	}*/
 }
 
