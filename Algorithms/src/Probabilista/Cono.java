@@ -26,9 +26,9 @@ public class Cono extends Funciones{
 		
 		for(int i = 0; i < k; i++) {
 			
-			x = random((-1)*r, r);
-			y = random((-1)*h, h);
-			z = 0;
+			x = random(0, r);
+			y = random(0, h);
+			z = random(0, h); // en torno a r y h
 			
 			if(z <= f(x, y)) {
 				aux++;
@@ -36,21 +36,37 @@ public class Cono extends Funciones{
 			
 		}
 		
-		volumen = 0;
-		
-		return 0;
+		volumen = Math.PI * r * r * h * ((double)aux/k);	//volumen del cilindro veces los aciertos del
+		IntervaloConfProporciones(volumen, k);
+		return volumen;
 	}
 
 	@Override
 	public double volumen() {
 		
-		double volumen = (Math.PI * Math.pow(r, 2) * h)/3;
+		double volumen = (4 * Math.PI * r * r) / 3;
 		return volumen;
 		
 	}
 
 	public double random(double min, double max){
 		return (Math.random() * (max - min)) + min;
+	}
+
+	public double getR() {
+		return r;
+	}
+
+	public void setR(double r) {
+		this.r = r;
+	}
+
+	public double getH() {
+		return h;
+	}
+
+	public void setH(double h) {
+		this.h = h;
 	}
 	
 }

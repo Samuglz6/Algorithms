@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 
-public class Main {
+public class BusquedaTexto{
 	
 	static Scanner sc = new Scanner(System.in);
 	static BufferedReader br = null;

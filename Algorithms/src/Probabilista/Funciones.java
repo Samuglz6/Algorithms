@@ -90,7 +90,6 @@ public abstract class Funciones {
 	}
 	
 	public void IntervaloConfProporciones(double p, int n){
-		System.out.println("\np="+p);
 		intervaloP[0] = p - 1.96 * Math.sqrt(Math.abs(p * (1 - p) / n));
 		intervaloP[1] = p + 1.96 * Math.sqrt(Math.abs(p * (1 - p) / n));
 	}
