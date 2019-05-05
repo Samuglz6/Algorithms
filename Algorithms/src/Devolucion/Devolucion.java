@@ -11,21 +11,179 @@ public class Devolucion {
 	private int dinero;
 	private ArrayList<Integer> monedas = new ArrayList<Integer>();
 	private Hashtable<Integer, Estado> sol = new Hashtable<Integer, Estado>();
+	private static Scanner sc = new Scanner(System.in);
 	
 	public Devolucion() throws InterruptedException
+	{	
+		
+		Estado inicial = inicio();
+		
+		System.out.println("Seleccione el algoritmo de busqueda que desea utilizar:");
+		int option = -1;
+		do {
+			System.out.println("1.-Backwards.");
+			System.out.println("2.-Forwards.");
+			System.out.println("3.-Matricial.");
+			System.out.print("-->");
+			option = sc.nextInt();
+		}while(option<1 || option>3);
+		
+		switch(option) {
+			case 1:
+				back(inicial);
+				break;
+			case 2:
+				forwards(inicial);
+				break;
+			case 3:
+				crearSol(matricial());
+				break;
+		}
+		
+	}
+		
+	private void matBack(int[][] array, int[][] ruta, int fila, int columna) {
+	
+		if(columna < array[0].length - 1 && array[fila][columna] != 0) {
+			
+			int nuevaColumna = columna + 1;
+			for(int i = 0; i < monedas.size(); i++) {
+				
+				int nuevoDinero = fila - monedas.get(i);
+				if(nuevoDinero >= 0) {
+					System.out.println("Nueva columna: " + nuevaColumna + " Nueva fila: " + nuevoDinero);
+					matBack(array, ruta, nuevoDinero, nuevaColumna);
+					if(array[nuevoDinero][nuevaColumna] + monedas.get(i) > array[fila][columna]) {
+						System.out.println("Actualizando [" + nuevoDinero + ", " + nuevaColumna + "]");
+						ruta[fila][columna] = 1;	
+					}	
+				}	
+			}	
+		}
+	}
+
+	private void matForw(int[][] array, int[][] ruta) {
+		
+		array[array.length-1][0] = 0;
+		for (int columna = 0; columna < array[0].length-1; columna++) {
+			
+			for (int fila = 0; fila < array.length; fila++) {
+				
+				if(array[fila][columna] > 0) {
+					
+					int nuevaColumna = columna+1;
+					for(int i = 0; i < monedas.size(); i++) {
+							//if(array[nuevoDinero][nuevaColumna] < array[fila][columna])
+					}
+				}
+			}
+		}	
+	}
+	
+	private void back(Estado actual)
 	{
-		back(inicio());
-		System.out.println(sol);
-		imprimirSolucion(sol.get(obtenerMayor()));
+		int i;
+		if(actual.getRestante() == 0 || !esPosible(actual.getRestante()))
+		{
+			actual.setMonedas(ceroMonedas());
+			actual.setUsadas(calcularUsadas(actual.getMonedas()));
+			sol.put(actual.getRestante(), actual);
+		}
+		else
+		{
+			for(i = 0; i < monedas.size(); i++)
+			{
+				if(actual.getRestante()-monedas.get(i) >= 0)
+				{
+					Estado nuevo = new Estado(actual.getRestante()-monedas.get(i), null);
+					System.out.println(nuevo);
+					back(nuevo);
+					if(!sol.containsKey(actual.getRestante()))
+					{
+						ArrayList<Integer> list = new ArrayList<Integer>(nuevo.getMonedas());
+						list.set(i, list.get(i)+1);
+						actual.setMonedas(list);
+						actual.setUsadas(calcularUsadas(actual.getMonedas()));
+						sol.put(actual.getRestante(), actual);
+					}
+					else
+					{
+						if(nuevo.getUsadas() < actual.getUsadas() || nuevo.getRestante() == 0)
+						{
+							ArrayList<Integer> list = new ArrayList<Integer>(sol.get(nuevo.getRestante()).getMonedas());
+							list.set(i, list.get(i)+1);
+							actual.setMonedas(list);
+							actual.setUsadas(calcularUsadas(actual.getMonedas()));
+							sol.put(actual.getRestante(), actual);
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	private void forwards(Estado inicial) {
+		
+	}
+	
+	private Hashtable<Integer,Integer> matricial(){
+		 
+		int calculo  = (int) Math.ceil(dinero/monedas.get(0));
+		int[][] array = new int[dinero+1][calculo+1]; 
+		int[][] ruta = new int[dinero+1][calculo+1];
+		Hashtable<Integer,Integer> sol = new Hashtable<Integer, Integer>();
+		
+		
+		for (int i = 0; i < array.length; i++) {
+			for(int j = 0; j < array[0].length; j++) {
+				array[i][j] = -1;
+				ruta[i][j] = -1;	
+			}	
+		}
+		
+		array[dinero][0] = dinero;
+		
+		int option = 0;
+		do {
+			System.out.println("Ahora selecciona que metodo matricial utilizar:\n" + 
+							   "1.-Backwards." +
+							   "2.-Forwards.");
+			option = sc.nextInt();
+		}while(option <= 0 || option > 2);
+		switch(option) {
+		
+			case 1:
+				matBack(array, ruta, dinero, 0);
+				break;
+			case 2: 
+				matForw(array, ruta);
+				break;
+		}
+		
+		
+		sol = matriz(ruta);
+		
+		return sol;
+		
+	}
+	
+	
+	/************************************************************************
+	 ********************** METODOS AUXILIARES ******************************
+	 ************************************************************************/
+	
+	private void crearSol(Hashtable<Integer, Integer> matricial) {
+		
 	}
 
 	private Estado inicio() throws InterruptedException
-	{
+	{	
 		lectura();
 		inicializarMonedas();
 		Estado inicial = new Estado(dinero, setMonedas());
 		return inicial;
 	}
+	
 	private void inicializarMonedas()
 	{
 		//Aqui ponemos las monedas que se van a poder utilizar para dar el cambio
@@ -196,46 +354,29 @@ public class Devolucion {
 		return list;
 	}
 	
-	private void back(Estado actual)
-	{
-		int i;
-		if(actual.getRestante() == 0 || !esPosible(actual.getRestante()))
-		{
-			actual.setMonedas(ceroMonedas());
-			actual.setUsadas(calcularUsadas(actual.getMonedas()));
-			sol.put(actual.getRestante(), actual);
+	private Hashtable<Integer, Integer> matriz(int[][] ruta) {
+		
+		Hashtable<Integer, Integer> solution = new Hashtable<Integer, Integer>();
+		
+		for(int i = 0; i < monedas.size(); i++) {
+			solution.put(monedas.get(i), 0);	
 		}
-		else
-		{
-			for(i = 0; i < monedas.size(); i++)
-			{
-				if(actual.getRestante()-monedas.get(i) >= 0)
-				{
-					Estado nuevo = new Estado(actual.getRestante()-monedas.get(i), null);
-					System.out.println(nuevo);
-					back(nuevo);
-					if(!sol.containsKey(actual.getRestante()))
-					{
-						ArrayList<Integer> list = new ArrayList<Integer>(nuevo.getMonedas());
-						list.set(i, list.get(i)+1);
-						actual.setMonedas(list);
-						actual.setUsadas(calcularUsadas(actual.getMonedas()));
-						sol.put(actual.getRestante(), actual);
-					}
-					else
-					{
-						if(nuevo.getUsadas() < actual.getUsadas() || nuevo.getRestante() == 0)
-						{
-							ArrayList<Integer> list = new ArrayList<Integer>(sol.get(nuevo.getRestante()).getMonedas());
-							list.set(i, list.get(i)+1);
-							actual.setMonedas(list);
-							actual.setUsadas(calcularUsadas(actual.getMonedas()));
-							sol.put(actual.getRestante(), actual);
-						}
-					}
-				}
+
+		for (int columna = 0; columna < ruta[0].length - 1; columna++) {
+			for(int fila = 1; fila < ruta.length - 1; fila++) {
+				
+				System.out.print(ruta[fila][columna] + " ");
+				//int ultimaFila = 0;
+				//if(ruta[fila][columna] == 1) {
+					//int monedaUsada = fila - ultimaFila;
+					//solution.replace(monedaUsada, solution.get(monedaUsada) + 1);	
+				//}
 			}
+			System.out.println();
 		}
+		return solution;
 	}
+
+	
 }
 
