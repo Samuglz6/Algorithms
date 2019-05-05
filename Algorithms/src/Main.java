@@ -1,6 +1,10 @@
 import Combinatorio.Combinatorio;
 import Devolucion.Devolucion;
+<<<<<<< HEAD
 import Probabilista.*;
+=======
+import Probabilista.Cono;
+>>>>>>> branch 'master' of https://github.com/Samuglz6/Algorithms.git
 
 import java.util.Scanner;
 
@@ -14,6 +18,7 @@ public class Main {
 	public static void main(String [] args)
 	{
 		try {
+<<<<<<< HEAD
 			
 			
 			int option = 0;
@@ -52,6 +57,11 @@ public class Main {
 			}
 			
 			
+=======
+			//Devolucion d = new Devolucion();
+			//Combinatorio c = new Combinatorio();
+			Cono c = new Cono();
+>>>>>>> branch 'master' of https://github.com/Samuglz6/Algorithms.git
 		} catch (Exception e) {
 			
 			e.printStackTrace();
