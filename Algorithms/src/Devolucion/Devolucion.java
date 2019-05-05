@@ -376,10 +376,7 @@ public class Devolucion {
 		}
 		return solution;
 	}
-<<<<<<< HEAD
 
-	
-=======
 	
 	/*public void forward()
 	{
@@ -391,6 +388,5 @@ public class Devolucion {
 					list();
 					
 	}*/
->>>>>>> branch 'master' of https://github.com/Samuglz6/Algorithms.git
 }
 

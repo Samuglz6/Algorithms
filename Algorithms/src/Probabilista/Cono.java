@@ -6,13 +6,11 @@ public class Cono extends Funciones{
 	private double r;
 	private double h;
 	
-	public Cono()
+	public Cono(double linf, double lsup, double r, double h)
 	{
-		super(6,4);
-		this.h = 6;
-		this.r = 4;
-		System.out.println("Calculado: "+volNumericoP(300));
-		System.out.println("Real: " + volumen());
+		super(linf, lsup);
+		this.r = r;
+		this.h = h;
 	}
 
 	@Override
@@ -29,31 +27,19 @@ public class Cono extends Funciones{
 		
 		for(int i = 0; i < k; i++) {
 			
-<<<<<<< HEAD
 			x = random(0, r);
 			y = random(0, h);
 			z = random(0, h); // en torno a r y h
-=======
-			x = random((-1)*r, r);
-			y = random(0, h);
-			z = random(0,h);
-			
->>>>>>> branch 'master' of https://github.com/Samuglz6/Algorithms.git
 			
 			if(z <= f(x, y)) {
 				puntos++;
 			}
 			
 		}
-		System.out.println("Puntos: "+puntos);
-		
-<<<<<<< HEAD
-		volumen = Math.PI * r * r * h * ((double)aux/k);	//volumen del cilindro veces los aciertos del
+
+		volumen = Math.PI * r * r * h * ((double)puntos/k);	//volumen del cilindro veces los aciertos del
 		IntervaloConfProporciones(volumen, k);
-=======
-		volumen = Math.pow(2*r*h, 3)*((double)puntos/k);
-		
->>>>>>> branch 'master' of https://github.com/Samuglz6/Algorithms.git
+
 		return volumen;
 	}
 
