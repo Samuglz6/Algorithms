@@ -4,10 +4,14 @@ import java.util.ArrayList;
 
 public class Estado {
 	private int restante;
-	private ArrayList<Integer> monedas = new ArrayList<Integer>();
+	private int[] monedas;
 	private int usadas;
 	
-	public Estado(int x, ArrayList<Integer> y)
+	
+	public Estado() {
+		
+	}
+	public Estado(int x, int[] y)
 	{
 		restante = x;
 		monedas = y;
@@ -19,7 +23,7 @@ public class Estado {
 		return restante;
 	}
 	
-	public ArrayList<Integer> getMonedas()
+	public int[] getMonedas()
 	{
 		return monedas;
 	}
@@ -34,7 +38,7 @@ public class Estado {
 		this.restante = valor;
 	}
 	
-	public void setMonedas(ArrayList<Integer> valor)
+	public void setMonedas(int[] valor)
 	{
 		this.monedas = valor;
 	}
@@ -46,6 +50,6 @@ public class Estado {
 	
 	public String toString()
 	{
-		return "Resto: "+restante+"\nMonedas: "+monedas+"\nUsadas: "+usadas+"\n";
+		return "Resto: "+restante+" Monedas: "+monedas+" Usadas: "+usadas+"\n";
 	}
 }

@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Devolucion {
 	
+	private Estado[][] array;
 	private int dinero;
 	private ArrayList<Integer> monedas = new ArrayList<Integer>();
 	private Hashtable<Integer, Estado> sol = new Hashtable<Integer, Estado>();
@@ -15,8 +16,7 @@ public class Devolucion {
 	
 	public Devolucion() throws InterruptedException
 	{	
-		
-		Estado inicial = inicio();
+		inicio();
 		
 		System.out.println("Seleccione el algoritmo de busqueda que desea utilizar:");
 		int option = -1;
@@ -28,12 +28,16 @@ public class Devolucion {
 			option = sc.nextInt();
 		}while(option<1 || option>3);
 		
+		int[] iniciales = new int[monedas.size()];
+		for(int i = 0; i < monedas.size(); i++) iniciales[i] = 0;
+		Estado inicial = new Estado(dinero, iniciales);
+		
 		switch(option) {
 			case 1:
 				back(inicial);
 				break;
 			case 2:
-				forwards(inicial);
+				forwards();
 				break;
 			case 3:
 				crearSol(matricial());
@@ -42,34 +46,33 @@ public class Devolucion {
 		
 	}
 		
-	private void matBack(int[][] array, int[][] ruta, int fila, int columna) {
-	
-		if(columna < array[0].length - 1 && array[fila][columna] != 0) {
+	private void matBack(Estado[][] array, int fila, int columna) {
+		System.out.println("CONDICIONES :" + (columna < monedas.size()) + " " + (fila != 0));
+		if(columna < (monedas.size() )) {
+			if(fila != 0) {
+				int nuevaColumna, nuevaFila;
+				int[] usadas = array[fila][columna].getMonedas();		//obtenemos las monedas usadas hasta ahora
+				double calculo = Math.floor(fila/monedas.get(columna)); //maximo de monedas que entran en ese numero
+				usadas[columna] += (int)calculo;		  		 //modificar las monedas usadas
+				Estado hijo = new Estado((int)(fila - calculo*monedas.get(columna)), usadas); //crear el hijo
 			
-			int nuevaColumna = columna + 1;
-			for(int i = 0; i < monedas.size(); i++) {
-				
-				int nuevoDinero = fila - monedas.get(i);
-				if(nuevoDinero >= 0) {
-					System.out.println("Nueva columna: " + nuevaColumna + " Nueva fila: " + nuevoDinero);
-					matBack(array, ruta, nuevoDinero, nuevaColumna);
-					if(array[nuevoDinero][nuevaColumna] + monedas.get(i) > array[fila][columna]) {
-						System.out.println("Actualizando [" + nuevoDinero + ", " + nuevaColumna + "]");
-						ruta[fila][columna] = 1;	
-					}	
-				}	
-			}	
+				nuevaFila = (int)(fila - calculo*monedas.get(columna));
+				System.out.println("NUEVONUM: " + nuevaFila);
+				nuevaColumna = columna + 1;
+				array[nuevaFila][nuevaColumna] = hijo;
+				matBack(array, nuevaFila, nuevaColumna);
+			}
 		}
 	}
 
-	private void matForw(int[][] array, int[][] ruta) {
+	private void matForw(Estado[][] array) {
 		
-		array[array.length-1][0] = 0;
+		array[array.length-1][0].setRestante(0);
 		for (int columna = 0; columna < array[0].length-1; columna++) {
 			
 			for (int fila = 0; fila < array.length; fila++) {
 				
-				if(array[fila][columna] > 0) {
+				if(array[fila][columna].getRestante() > 0) {
 					
 					int nuevaColumna = columna+1;
 					for(int i = 0; i < monedas.size(); i++) {
@@ -100,7 +103,7 @@ public class Devolucion {
 					back(nuevo);
 					if(!sol.containsKey(actual.getRestante()))
 					{
-						ArrayList<Integer> list = new ArrayList<Integer>(nuevo.getMonedas());
+						int[] list = new ArrayList<Integer>(nuevo.getMonedas());
 						list.set(i, list.get(i)+1);
 						actual.setMonedas(list);
 						actual.setUsadas(calcularUsadas(actual.getMonedas()));
@@ -122,26 +125,24 @@ public class Devolucion {
 		}
 	}
 	
-	private void forwards(Estado inicial) {
+	private void forwards() {
 		
 	}
 	
 	private Hashtable<Integer,Integer> matricial(){
 		 
-		int calculo  = (int) Math.ceil(dinero/monedas.get(0));
-		int[][] array = new int[dinero+1][calculo+1]; 
-		int[][] ruta = new int[dinero+1][calculo+1];
+		array = new Estado[dinero+1][monedas.size()+1]; 
 		Hashtable<Integer,Integer> sol = new Hashtable<Integer, Integer>();
 		
 		
 		for (int i = 0; i < array.length; i++) {
 			for(int j = 0; j < array[0].length; j++) {
-				array[i][j] = -1;
-				ruta[i][j] = -1;	
+				array[i][j] = new Estado();
 			}	
 		}
-		
-		array[dinero][0] = dinero;
+		int[] iniciales = new int[monedas.size()]; 
+		Estado Inicial = new Estado(dinero, iniciales);
+		array[dinero][0] = Inicial;
 		
 		int option = 0;
 		do {
@@ -153,15 +154,15 @@ public class Devolucion {
 		switch(option) {
 		
 			case 1:
-				matBack(array, ruta, dinero, 0);
+				matBack(array, dinero, 0);
 				break;
 			case 2: 
-				matForw(array, ruta);
+				matForw(array);
 				break;
 		}
 		
 		
-		sol = matriz(ruta);
+		sol = matriz(array);
 		
 		return sol;
 		
@@ -176,18 +177,16 @@ public class Devolucion {
 		
 	}
 
-	private Estado inicio() throws InterruptedException
+	private void inicio() throws InterruptedException
 	{	
 		lectura();
 		inicializarMonedas();
-		Estado inicial = new Estado(dinero, setMonedas());
-		return inicial;
 	}
 	
 	private void inicializarMonedas()
 	{
 		//Aqui ponemos las monedas que se van a poder utilizar para dar el cambio
-		monedas.add(1);
+		monedas.add(3);
 		monedas.add(2);
 		//monedas.add(5);
 		//monedas.add(10);
@@ -227,10 +226,11 @@ public class Devolucion {
 		int contadorO, contadorD;
 		contadorO = contadorD = 0;
 		
-		for(i = 0; i < origen.getMonedas().size()-1; i++)
+		for(i = 0; i < origen.getMonedas().length-1; i++)
 		{
-			contadorO += origen.getMonedas().get(i);
-			contadorD += destino.getMonedas().get(i);
+			
+			contadorO += origen.getMonedas()[i];
+			contadorD += destino.getMonedas()[i];
 		}
 		
 		return contadorD < contadorO;
@@ -259,12 +259,12 @@ public class Devolucion {
 	private void imprimirSolucion(Estado e)
 	{
 		System.out.printf("Para la cantidad de %d € se han empleado:\n" , dinero);
-		for(int i= 0; i < e.getMonedas().size(); i++)
+		for(int i= 0; i < e.getMonedas().length; i++)
 		{
-			if(e.getMonedas().get(i) > 1)
-				System.out.printf("%d monedas de %d €\n", e.getMonedas().get(i), monedas.get(i));
+			if(e.getMonedas()[i] > 1)
+				System.out.printf("%d monedas de %d €\n", e.getMonedas()[i], monedas.get(i));
 			else
-				System.out.printf("%d moneda de %d €\n", e.getMonedas().get(i), monedas.get(i));
+				System.out.printf("%d moneda de %d €\n", e.getMonedas()[i], monedas.get(i));
 		}
 		if(e.getRestante() > 1)
 			System.out.printf("Y faltarían %d €\n", resto(e));
@@ -278,7 +278,7 @@ public class Devolucion {
 		int contador = 0;
 		for(i = 0; i < monedas.size(); i++)
 		{
-			contador += monedas.get(i)*e.getMonedas().get(i);
+			contador += monedas.get(i)*e.getMonedas()[i];
 		}
 		return e.getRestante()-contador;
 	}
@@ -304,7 +304,7 @@ public class Devolucion {
 	   
         return n;
     }
-	
+	/*
 	private void backward(Estado actual)
 	{ 
 		int i;
@@ -343,7 +343,7 @@ public class Devolucion {
 		}
 		
 		
-	}
+	}*/
 
 	private ArrayList<Integer> ceroMonedas()
 	{
@@ -354,10 +354,10 @@ public class Devolucion {
 		return list;
 	}
 	
-	private Hashtable<Integer, Integer> matriz(int[][] ruta) {
+	private Hashtable<Integer, Integer> matriz(Estado[][] ruta) {
 		
 		Hashtable<Integer, Integer> solution = new Hashtable<Integer, Integer>();
-		
+		/*
 		for(int i = 0; i < monedas.size(); i++) {
 			solution.put(monedas.get(i), 0);	
 		}
@@ -372,8 +372,7 @@ public class Devolucion {
 					//solution.replace(monedaUsada, solution.get(monedaUsada) + 1);	
 				//}
 			}
-			System.out.println();
-		}
+		}*/
 		return solution;
 	}
 
