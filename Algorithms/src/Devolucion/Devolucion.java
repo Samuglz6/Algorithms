@@ -34,7 +34,7 @@ public class Devolucion {
 		
 		switch(option) {
 			case 1:
-				back(inicial);
+				back();
 				break;
 			case 2:
 				forwards();
@@ -83,9 +83,21 @@ public class Devolucion {
 		}	
 	}
 	
-	private void back(Estado actual)
+	private void back()
 	{
-		int i;
+		
+		ArrayList<Estado> nodeList = new ArrayList<Estado>();
+		int[] lista = new int[monedas.size()];
+		for(int i : lista) {
+			lista[i] = 0;
+		}
+		Estado initial  = new Estado(dinero, lista);
+		nodeList.add(initial);
+		
+		backwards(initial, nodeList);
+		
+		
+		/*int i;
 		if(actual.getRestante() == 0 || !esPosible(actual.getRestante()))
 		{
 			actual.setMonedas(ceroMonedas());
@@ -122,9 +134,79 @@ public class Devolucion {
 					}
 				}
 			}
-		}
+		}*/
 	}
 	
+	private void backwards(Estado current, ArrayList<Estado> nodeList) {
+		
+		if(current.getRestante() < monedas.get(monedas.size()-1)) {
+			System.out.println("FINIQUITAUN CON VALOR: " + current.getRestante());
+			return;
+			
+		}else {
+			
+			int multiplicador;
+			ArrayList<Estado> adjacents = new ArrayList<Estado>();
+			
+			for(int i = 0; i < monedas.size(); i ++) {
+				multiplicador = 1;
+				Estado foo = new Estado();
+				int[] thing = current.getMonedas().clone();
+				
+				while(multiplicador*monedas.get(i)<current.getRestante()) {
+					thing[i]++;
+					foo.setRestante(current.getRestante() - (multiplicador*monedas.get(i)));
+					foo.setMonedas(thing);
+					multiplicador++;
+					//System.out.println("CREANDO HIJO: " + foo.getRestante() + " CON LAS MONEDAS USADAS: " + foo.getMonedas()[0] + " " + foo.getMonedas()[1]);
+					adjacents.add(foo);
+					System.out.println("AÑADIENDO HJIJO: " + foo.getRestante() + " CON LAS MONEDAS USADAS: " + foo.getMonedas()[0] + " " + foo.getMonedas()[1]);
+					
+				};
+				
+			}
+			
+			for(int i = 0; i < adjacents.size(); i++) {
+				System.out.println("ADYACENTE DE: " + current.getRestante() + " ES EL: " + adjacents.get(i).getRestante() + " CON LAS MONEDAS:" + adjacents.get(i).getMonedas()[0] + " " + adjacents.get(i).getMonedas()[1]);
+			}
+			
+			
+			for(Estado adjacent : adjacents) {
+				
+				//System.out.println("HIJO: " + adjacent.getRestante());
+				
+				if(nodeList.contains(adjacent)) {
+					//System.out.println("NodeList contiene HIJO");
+					adjacent = nodeList.get(nodeList.indexOf(adjacent));
+				}else {
+					//System.out.println("NodeList no contiene HIJO");
+					nodeList.add(adjacent);
+					backwards(adjacent, nodeList);
+				}
+				
+				if(current.getSucc() == null) {
+					//System.out.println("Actual no tiene sucesor");
+					current.setSucc(adjacent);
+				}else {
+					//System.out.println("Actual tiene sucesor");
+					if(esMejor(current.getSucc(), adjacent)) {
+						//System.out.println("Pero el nuevo es mejor");
+						current.setSucc(adjacent);
+					}
+				}
+				if(current.getSucc().isSolution() || current.getSucc().getRestante() == 0){
+					current.setSolution(true);
+				}
+			}
+			
+			
+			
+			
+			
+		}
+		
+	}
+
 	private void forwards() {
 		
 	}
@@ -222,18 +304,20 @@ public class Devolucion {
 	
 	private boolean esMejor(Estado origen, Estado destino)
 	{
+		
 		int i;
 		int contadorO, contadorD;
 		contadorO = contadorD = 0;
 		
-		for(i = 0; i < origen.getMonedas().length-1; i++)
+		for(i = 0; i < monedas.size(); i++)
 		{
 			
 			contadorO += origen.getMonedas()[i];
 			contadorD += destino.getMonedas()[i];
 		}
 		
-		return contadorD < contadorO;
+		if(contadorO < contadorD) return false;
+		else return true;
 	}
 
 	private int obtenerMayor()

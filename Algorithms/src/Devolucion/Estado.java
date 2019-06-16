@@ -5,8 +5,8 @@ import java.util.ArrayList;
 public class Estado {
 	private int restante;
 	private int[] monedas;
-	private int usadas;
-	
+	private Estado succ;
+	private boolean solution;
 	
 	public Estado() {
 		
@@ -15,7 +15,8 @@ public class Estado {
 	{
 		restante = x;
 		monedas = y;
-		usadas = 0;
+		succ = null;
+		solution = false;
 	}
 	
 	public int getRestante()
@@ -28,11 +29,6 @@ public class Estado {
 		return monedas;
 	}
 	
-	public int getUsadas()
-	{
-		return usadas;
-	}
-	
 	public void setRestante(int valor)
 	{
 		this.restante = valor;
@@ -43,13 +39,20 @@ public class Estado {
 		this.monedas = valor;
 	}
 	
-	public void setUsadas(int valor)
-	{
-		this.usadas = valor;
-	}
-	
 	public String toString()
 	{
-		return "Resto: "+restante+" Monedas: "+monedas+" Usadas: "+usadas+"\n";
+		return "Resto: "+restante+" Monedas: "+monedas+"\n";
+	}
+	public Estado getSucc() {
+		return succ;
+	}
+	public void setSucc(Estado succ) {
+		this.succ = succ;
+	}
+	public boolean isSolution() {
+		return solution;
+	}
+	public void setSolution(boolean solution) {
+		this.solution = solution;
 	}
 }
